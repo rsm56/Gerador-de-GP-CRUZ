@@ -149,12 +149,10 @@ function extrairLista() {
         bichosOficiais.forEach(bicho => {
             const bichoNorm = limparTexto(bicho);
             if (linhaNorm.includes(bichoNorm)) {
-                // Filtro para 1º PRÊMIO (Hoje/Ontem)
                 if ((linhaNorm.includes("hoje") || linhaNorm.includes("ontem")) && (linhaNorm.includes("1º") || linhaNorm.includes("primeiro"))) {
                     if (linhaNorm.includes("hoje")) dadosApp.extrator.hoje.push(bicho);
                     else dadosApp.extrator.ontem.push(bicho);
                 }
-                // Filtro de ATRASADOS (1º PRÊMIO)
                 else if (linhaNorm.includes("atrasado") || linhaNorm.includes("dia")) {
                     let matchDias = linha.match(/(\d+)\s*(dia|atrasado)/i);
                     let diasValor = matchDias ? matchDias[1] : "??";
@@ -195,10 +193,9 @@ function gerarProjecaoCinco() {
         n.forEach(n1 => n.forEach(n2 => { if(n1 !== n2) { let b = getBicho("00" + n1 + n2); if(b && !bichosCruz.includes(b)) bichosCruz.push(b); } }));
     }
 
-    // Bloqueia apenas quem saiu no 1º PRÊMIO Hoje ou Ontem
+    // Pega APENAS os 4 primeiros bichos da Cruz gerada
+    let cruzLimitada = bichosCruz.slice(0, 4);
     let bloqueados = [...dadosApp.extrator.hoje, ...dadosApp.extrator.ontem];
-    
-    // Candidatos são os atrasados que não saíram no 1º prêmio hoje/ontem
     const candidatos = dadosApp.extrator.nomesAtrasados.filter(nome => !bloqueados.includes(nome));
     
     if (candidatos.length > 0) {
@@ -207,11 +204,11 @@ function gerarProjecaoCinco() {
         listaHtml.innerHTML = ""; listaSugestoes.innerHTML = "";
         let temSugestao = false;
         
-        // Prioridade: Bicho que está na Cruz E está atrasado no 1º prêmio
-        let ordenados = [...new Set([...bichosCruz.filter(b => candidatos.includes(b)), ...candidatos])].slice(0, 7);
+        // Monta a lista: Cruz Limitada (4) + os Atrasados que completam a grade
+        let ordenados = [...new Set([...cruzLimitada, ...candidatos])].slice(0, 8);
         
         ordenados.forEach(grupo => {
-            const ehCruz = bichosCruz.includes(grupo);
+            const ehCruz = cruzLimitada.includes(grupo);
             listaHtml.innerHTML += `<div class="grupo-badge">${grupo}${ehCruz ? '<span class="selo-cruz">CRUZ</span>' : ''}</div>`;
             if(ehCruz) {
                 temSugestao = true;
